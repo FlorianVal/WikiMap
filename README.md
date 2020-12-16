@@ -2,7 +2,7 @@
 Let's map wikipedia
 
 ## WikiCrawler
-Give all the article links in a given wikipedia article using (Scrapy)[https://scrapy.org/] in python.
+Give all the article links in a given wikipedia article using [Scrapy](https://scrapy.org/) in python.
 
 ## Database
 
