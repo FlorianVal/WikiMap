@@ -8,13 +8,8 @@ services:
       - 7474:7474
       - 7687:7687
     volumes:
-      - ./database/conf:/conf
-      - ./database/data:/data
-      - ./database/import:/import
+      - ./database/conf:/var/lib/neo4j/conf
+      - ./database/data:/var/lib/neo4j/data
+      - ./database/import:/var/lib/neo4j/import
       - ./database/logs:/logs
-      - ./database/plugins:/plugins
-    # environment: 
-      # Raise memory limits
-      # - NEO4J_dbms_memory_pagecache_size=2G
-      # - NEO4J_dbms.memory.heap.initial_size=1G
-      # - NEO4J_dbms_memory_heap_max__size=1G
+      - ./database/plugins:/var/lib/neo4j/plugins
