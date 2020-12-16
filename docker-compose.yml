@@ -13,3 +13,12 @@ services:
       - ./database/import:/var/lib/neo4j/import
       - ./database/logs:/logs
       - ./database/plugins:/var/lib/neo4j/plugins
+  jupyter:
+    build: ./WikiCrawler/
+    image: jupyterwikicrawler:1.0.0
+    volumes:
+      - ./WikiCrawler/wikiCrawler.ipynb:/home/jovyan/work/wikiCrawler.ipynb
+    ports:
+      - "8888:8888"
+    links: 
+      - "neo4j:db"
