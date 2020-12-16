@@ -1,6 +1,9 @@
 # WikiMap
 Let's map wikipedia
 
+## WikiCrawler
+Give all the article links in a given wikipedia article using (Scrapy)[https://scrapy.org/] in python.
+
 ## Database
 
 Datas are stored in a Neo4J database. For now, to build it up just run :
