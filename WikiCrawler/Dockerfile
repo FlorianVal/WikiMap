@@ -1,3 +1,3 @@
-FROM jupyter/datascience-notebook:latest
+FROM python:3.8.7
 
-RUN pip install neo4j scrapy
+RUN pip install neo4j scrapy pandas
