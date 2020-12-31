@@ -27,7 +27,7 @@ class LinkSpider(scrapy.Spider):
 
     def __init__(self, link):
         super(LinkSpider, self).__init__()
-        self.start_urls = [f"https://en.wikipedia.org/{str(link)}"]
+        self.start_urls = [f"https://en.wikipedia.org/wiki/{str(link)}"]
 
     custom_settings = {
         'LOG_LEVEL': logging.WARNING,
@@ -39,7 +39,7 @@ class LinkSpider(scrapy.Spider):
             linkString = str(link.css('::attr(href)').extract_first())
             if ( (linkString[0:6] == '/wiki/') & (linkString[6:11] != 'File:') ):
                 yield {
-                    'text': linkString,
+                    'text': linkString[6:],
                 }
 
 def get_links_from_page(url):
@@ -63,20 +63,22 @@ class Neo4jDatabase:
         self.max_query_size = 10
         if user and password:
             self.driver = GraphDatabase.driver(uri, auth=(user, password))
-        else: 
+        else:
             self.driver = GraphDatabase.driver(uri)
-            
+
     def __del__(self):
         self.driver.close()
-    
+
     @unit_of_work(timeout=5)
     def _get_nodes(self, tx, limit):
         return [dict(record) for record in tx.run(f"MATCH (node) RETURN (node) LIMIT {limit}")]
-    
+
     @unit_of_work(timeout=5)
-    def _get_relations(self, tx, limit):
-        return [dict(record) for record in tx.run(f"MATCH (root)-[relation]->(leaf) RETURN root, relation, leaf LIMIT {limit}")]
-    
+    def _get_relations(self, tx, link, limit):
+        #return [dict(record) for record in tx.run(f"MATCH (root)-[relation]->(leaf) RETURN root, relation, leaf LIMIT {limit}")]
+        return [record for record in tx.run("MATCH (:WikiPage {" + f"link: \"{str(link)}\"" + "}" + f")-[relation]-(leaf) RETURN leaf LIMIT {limit}")]
+
+
     @unit_of_work(timeout=5)
     def _add_nodes(self, tx, query):
         return tx.run(query)
@@ -85,12 +87,12 @@ class Neo4jDatabase:
         # Return all nodes in limit
         with self.driver.session() as session:
             return session.read_transaction(self._get_nodes, limit)
-        
+
     def get_all_relations(self, limit=25):
         # Return all nodes in limit
         with self.driver.session() as session:
             return session.read_transaction(self._get_relations, limit)
-            
+
     def add_new_page(self, root, leaves):
         # Add a new root node and create a relationship with all the leaves
         # This function create new leaves if it don't already exist
@@ -104,7 +106,7 @@ class Neo4jDatabase:
             with self.driver.session() as session:
                 session.write_transaction(self._add_nodes, query)
         return "Ok"
-    
+
     def split_list_in_sublist(self, leaves):
         # this function is made to split big list in many list
         _ = 0
@@ -125,7 +127,24 @@ def test_neo4j_wrapper():
     database.add_new_page("Philosophy", ["leaf3", "leaf1", "leaf5"])
     print(database.get_all_nodes()) # should print all nodes in database
     print("\n")
-    print(database.get_all_relations()) # should print all relations in database
+    #print(database.get_all_relations()) # should print all relations in database
+
+def crawler(database, link):
+    links_in_page = get_links_from_page(link)
+    print(str(link))
+    database.add_new_page(str(link),links_in_page)
+
+def controler(database, link):
+
+    crawler(database, link)
+
+    with database.driver.session() as session:
+        # TODO: Change limit for no limit possible
+        links = database._get_relations(session, link, 200)
+        for link in links:
+            print(link[0].get("link"))
+            crawler(database, link[0].get("link"))
+
 
 
 if __name__ == "__main__":
@@ -134,11 +153,9 @@ if __name__ == "__main__":
     parser.add_argument("db", help="Link to db", nargs="?", default="bolt://db:7687")
     args = parser.parse_args()
 
-    links_in_page = get_links_from_page(args.link)
-    print(links_in_page)
+    #test_neo4j_wrapper()
+
+    #Db initialisation
     database = Neo4jDatabase(args.db)
 
-    database.add_new_page(str(args.link),links_in_page)
-
-
-
+    controler(database, args.link)
