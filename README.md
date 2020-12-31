@@ -26,6 +26,3 @@ Neo4j control panel on
 ```
 localhost:7474
 ```
-## ToDo
-
-Add Kerberos auth to neo4j, see : https://neo4j.com/docs/operations-manual/current/authentication-authorization/introduction/#auth-introduction under "Kerberos authentication and single sign-on" section
