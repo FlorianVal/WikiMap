@@ -15,7 +15,7 @@ services:
       - ./database/plugins:/var/lib/neo4j/plugins
   jupyter:
     build: ./WikiCrawler/
-    image: WikiCrawler:1.0.0
+    image: wikicrawler:1.0.0
     volumes:
       - ./WikiCrawler/:/opt/
     ports:
