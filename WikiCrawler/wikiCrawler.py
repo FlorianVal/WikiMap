@@ -17,7 +17,7 @@ def get_links_from_page(url):
     links = []
 
     for item in soup.select("div.mw-parser-output a"):
-        if item.has_attr("href") and item["href"].startswith("/wiki"):
+        if item.has_attr("href") and item["href"].startswith("/wiki") and not item["href"].split("/")[2].startswith("File:"):
             links.append(item["href"])
     return [res.split("/")[2] for res in list(set(links))]
 
