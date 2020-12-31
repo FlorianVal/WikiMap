@@ -59,8 +59,10 @@ class Neo4jDatabase:
         # This function create new leaves if it don't already exist
         list_of_leaves = self.split_list_in_sublist(leaves)
         for leaves in list_of_leaves:
+            root.replace('"','\\"')
             query = "merge (%s:WikiPage {link: \"%s\"})\n" % ("root", root)
             for i, leave in enumerate(leaves):
+                leave.replace('"','\\"')
                 query += "merge (%s:WikiPage {link: \"%s\"})\n" % ("n"+str(i), leave)
             for i, leave in enumerate(leaves):
                 query += "merge (%s)-[:IsIn]->(%s)\n" % ("root", "n"+str(i))
