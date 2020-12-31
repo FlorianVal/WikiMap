@@ -4,4 +4,4 @@ RUN pip install neo4j requests beautifulsoup4
 
 ADD ./wikiCrawler.py /opt/wikiCrawler.py
 
-CMD echo "Launching container"
+CMD ["python3","/opt/wikiCrawler.py","Philosophy"]

@@ -22,7 +22,3 @@ services:
       - "8888:8888"
     links: 
       - "neo4j:db"
-    command:
-      - "/bin/bash"
-    stdin_open: true
-    tty: true

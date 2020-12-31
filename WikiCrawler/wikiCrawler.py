@@ -97,7 +97,6 @@ def crawler(database, link):
 def controler(database, link):
 
     crawler(database, link)
-
     with database.driver.session() as session:
         #init for while
         links = [link]
