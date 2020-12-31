@@ -1,10 +1,13 @@
 import logging
 import argparse
 import requests
+import random
+import time
 
 from bs4 import BeautifulSoup
 from neo4j import GraphDatabase, unit_of_work
 
+logging.basicConfig(level=logging.INFO)
 
 def get_links_from_page(url):
     url = f"https://en.wikipedia.org/wiki/{str(url)}"
@@ -38,7 +41,10 @@ class Neo4jDatabase:
     def _get_relations(self, tx, link, limit):
         #return [dict(record) for record in tx.run(f"MATCH (root)-[relation]->(leaf) RETURN root, relation, leaf LIMIT {limit}")]
         return [record for record in tx.run("MATCH (:WikiPage {" + f"link: \"{str(link)}\"" + "}" + f")-[relation]-(leaf) RETURN leaf LIMIT {limit}")]
-
+   
+    @unit_of_work(timeout=5)
+    def _get_lonely_nodes(self, tx):
+        return [record for record in tx.run("MATCH (a:WikiPage) WHERE not ((a)-[:IsIn]->(:WikiPage)) RETURN a LIMIT 50;")]
 
     @unit_of_work(timeout=5)
     def _add_nodes(self, tx, query):
@@ -86,7 +92,6 @@ class Neo4jDatabase:
 
 def crawler(database, link):
     links_in_page = get_links_from_page(link)
-    print(link)
     database.add_new_page(str(link),links_in_page)
 
 def controler(database, link):
@@ -94,11 +99,17 @@ def controler(database, link):
     crawler(database, link)
 
     with database.driver.session() as session:
-        # TODO: Change limit for no limit possible
-        links = database._get_relations(session, link, 200)
-        for link in links:
-            print(link[0].get("link"))
+        #init for while
+        links = [link]
+
+        # loop until full db completed
+        while links:
+            links = database._get_lonely_nodes(session)
+            link = random.choice(links)
+            logging.info(f"Doing : {str(link[0].get('link'))}")
             crawler(database, link[0].get("link"))
+            #prevent ban IP
+            time.sleep(2)
 
 
 
@@ -107,7 +118,7 @@ if __name__ == "__main__":
     parser.add_argument("link", help="Page to crawl")
     parser.add_argument("db", help="Link to db", nargs="?", default="bolt://db:7687")
     args = parser.parse_args()
-
+    logging.info(f"Initialising Crawler on {args.link}")
     #Db initialisation
     database = Neo4jDatabase(args.db)
 
