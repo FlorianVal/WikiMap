@@ -16,12 +16,8 @@ docker-compose up
 ```
 This will build :
 - A neo4j database
-- A docker with Python and a Jupyter notebook
+- A docker with Python
 
-Jupyter will be accessible on
-```
-localhost:8888
-```
 Neo4j control panel on
 ```
 localhost:7474
@@ -48,11 +44,12 @@ To run this project just do:
 minikube start
 ```
 ```
+cd Kubernetes_config
 kubectl apply -f .
 ```
 This will build :
 - A neo4j database
-- A docker with Python and a Jupyter notebook
+- A docker with Python
 
 Neo4j control panel on
 ```
@@ -60,17 +57,6 @@ localhost:7474
 ```
 
 ##Changes needed
-
-In wikiCrawler.py
-
-replace
-```
-CMD ["python3","/opt/wikiCrawler.py","Philosophy"]
-```
-by
-```
-CMD echo "Launching container"
-```
 
 In docker-compose.yml
 ```
@@ -95,12 +81,8 @@ services:
     labels:
       kompose.service.type: loadbalancer
     build: ./WikiCrawler/
-    image: florianval/wiki-crawler:101
+    image: florianval/wiki-crawler:1.0.1
     volumes:
       - ./WikiCrawler/:/opt/
     ports:
       - "8888:8888"
-    command:
-      - "/bin/bash"
-    stdin_open: true
-    tty: true
