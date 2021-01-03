@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.service.type: loadbalancer
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: wikicrawler
+  name: wikicrawler
+spec:
+  ports:
+    - name: "8888"
+      port: 8888
+      targetPort: 8888
+  selector:
+    io.kompose.service: wikicrawler
+  type: LoadBalancer
+status:
+  loadBalancer: {}
