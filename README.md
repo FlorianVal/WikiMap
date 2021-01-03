@@ -56,33 +56,3 @@ Neo4j control panel on
 localhost:7474
 ```
 
-##Changes needed
-
-In docker-compose.yml
-```
-version: '3'
-
-services:
-  neo4j:
-    labels:
-      kompose.service.type: loadbalancer
-    image: neo4j:4.2
-    restart: unless-stopped
-    ports:
-      - 7474:7474
-      - 7687:7687
-    volumes:
-      - ./database/conf:/var/lib/neo4j/conf
-      - ./database/data:/var/lib/neo4j/data
-      - ./database/import:/var/lib/neo4j/import
-      - ./database/logs:/logs
-      - ./database/plugins:/var/lib/neo4j/plugins
-  wikicrawler:
-    labels:
-      kompose.service.type: loadbalancer
-    build: ./WikiCrawler/
-    image: florianval/wiki-crawler:1.0.1
-    volumes:
-      - ./WikiCrawler/:/opt/
-    ports:
-      - "8888:8888"
