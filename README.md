@@ -104,4 +104,3 @@ services:
       - "/bin/bash"
     stdin_open: true
     tty: true
-'''
