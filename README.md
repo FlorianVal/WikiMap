@@ -2,7 +2,7 @@
 Let's map wikipedia
 
 ## WikiCrawler
-Give all the article links in a given wikipedia article using [Scrapy](https://scrapy.org/) in python.
+Give all the article links in a given wikipedia article using BeautifulSoup in python.
 
 ## Database
 
@@ -22,6 +22,15 @@ Neo4j control panel on
 ```
 localhost:7474
 ```
+
+On this interface just click connect
+
+and then write 
+```
+MATCH (n:WikiPage)-[r]->(m:WikiPage) return n
+```
+
+at the top of the page to see processed pages 
 
 ## Test with kubernetes (Failed)
 
