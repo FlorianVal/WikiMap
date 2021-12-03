@@ -2,7 +2,7 @@ version: '3'
 
 services:
   neo4j:
-    image: neo4j:4.2
+    image: neo4j/neo4j-arm64-experimental:4.1.0-arm64
     restart: unless-stopped
     ports:
       - 7474:7474
@@ -13,12 +13,17 @@ services:
       - ./database/import:/var/lib/neo4j/import
       - ./database/logs:/logs
       - ./database/plugins:/var/lib/neo4j/plugins
-  jupyter:
-    build: ./WikiCrawler/
+  crawler:
+    build:
+      context: .
+      dockerfile: ./dockerfile/Dockerfile
     image: wikicrawler:1.0.0
     volumes:
-      - ./WikiCrawler/:/opt/
+      - ./:/opt/
     ports:
       - "8888:8888"
     links: 
       - "neo4j:db"
+    depends_on:
+      - "neo4j"
+    command: python app.py --action crawl

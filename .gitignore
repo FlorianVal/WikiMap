@@ -1,4 +1,6 @@
 .ipynb_checkpoints
 WikiCrawler/linksResult.*
+WikiCrawler/__pycache__/
 database/data
 database/logs
+logs
