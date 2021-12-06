@@ -1,2 +1,5 @@
 website: "https://en.wikipedia.org/wiki/"
 time_between_request: 2
+div_to_crawl: "div.mw-parser-output"
+filter_link:
+  

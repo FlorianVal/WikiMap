@@ -26,4 +26,5 @@ services:
       - "neo4j:db"
     depends_on:
       - "neo4j"
+    restart: always
     command: python app.py --action crawl
