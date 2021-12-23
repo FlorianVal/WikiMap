@@ -5,3 +5,4 @@ database/data
 database/logs
 logs
 *.pyc
+.DS_Store
