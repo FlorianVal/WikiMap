@@ -1,6 +1,8 @@
 from neo4j import GraphDatabase, unit_of_work
 
+import types
 import logging
+import time
 
 class Neo4jDatabase:
     # Wrapper around Neo4j database to easily use Cypher in Python
