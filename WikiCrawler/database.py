@@ -7,6 +7,10 @@ class Neo4jDatabase:
     def __init__(self, uri, user=None, password=None):
         logging.info("Connecting to Neo4j database")
         self.max_query_size = 10
+        self.uri = uri
+        if user and password:
+            self.user = user
+            self.password = password
         if user and password:
             self.driver = GraphDatabase.driver(uri, auth=(user, password))
         else:
@@ -62,9 +66,13 @@ class Neo4jDatabase:
     def _get_lonely_nodes(self, tx):
         return [record for record in tx.run("MATCH (a:WikiPage) WHERE a.Analyzed is null AND a.NotFound is null RETURN a LIMIT 50;")]
 
-    @unit_of_work(timeout=15)
+    @unit_of_work(timeout=50)
     def _add_nodes(self, tx, query):
-        return tx.run(query)
+        try:
+            return tx.run(query)
+        except Exception as e:
+            logging.error(query)
+            logging.error(e)
 
     def get_all_nodes(self, limit=25):
         # Return all nodes in limit
@@ -87,17 +95,33 @@ class Neo4jDatabase:
         return "Ok"
 
     def add_new_page(self, content, leaves):
+        """add a new node in the database
+
+        Args:
+            content (dict): dict containing keys to add in node must contain Title
+            leaves (list): list of nodes to link to the new node
+
+        Returns:
+            str: ok
+        """
         # Add a new root node and create a relationship with all the leaves
         # This function create new leaves if it don't already exist
+
         list_of_leaves = self.split_list_in_sublist(leaves)
-        content = ", ".join(['%s: \'%s\'' % (key, value) for (key, value) in content.items()])
+        title = content['Title']
+        content.pop('Title')
+        content["Analyzed"] = "true"
+        for key in content:
+            if content[key] == None:
+                content.pop(key)
+        content = ", ".join(['root.%s = \'%s\'' % (key, self.clean_string(value)) for (key, value) in content.items()])
         for leaves in list_of_leaves:
-            query = "merge (%s:WikiPage {%s})\n" % ("root", content)
+            query = "merge (root:WikiPage {Title: \"%s\"}) SET %s\n" % (title, content)
             for i, leave in enumerate(leaves):
                 leave = leave.replace('"','\\"')
                 query += "merge (%s:WikiPage {Title: \"%s\"})\n" % ("n"+str(i), leave)
             for i, leave in enumerate(leaves):
-                query += "merge (%s)-[:IsIn]->(%s)\n" % ("root", "n"+str(i))
+                query += "merge (root)-[:IsIn]->(%s)\n" % ("n"+str(i))
             with self.driver.session() as session:
                 session.write_transaction(self._add_nodes, query)
             continue
