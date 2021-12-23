@@ -4,3 +4,4 @@ WikiCrawler/__pycache__/
 database/data
 database/logs
 logs
+*.pyc
