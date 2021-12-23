@@ -31,7 +31,7 @@ class Neo4jDatabase:
 
     @unit_of_work(timeout=5)
     def _get_lonely_nodes(self, tx):
-        return [record for record in tx.run("MATCH (a:WikiPage) WHERE not ((a)-[:IsIn]->(:WikiPage)) RETURN a LIMIT 50;")]
+        return [record for record in tx.run("MATCH (a:WikiPage) WHERE a.Analyzed is null AND a.NotFound is null RETURN a LIMIT 50;")]
 
     @unit_of_work(timeout=15)
     def _add_nodes(self, tx, query):
@@ -47,6 +47,9 @@ class Neo4jDatabase:
         with self.driver.session() as session:
             return session.read_transaction(self._get_relations, limit)
 
+    def get_lonely_nodes(self):
+        with self.driver.session() as session:
+            return self._get_lonely_nodes(session)
 
     def update_node_not_found(self, title):
         logging.info("Page not found : %s notified to db" % title)
