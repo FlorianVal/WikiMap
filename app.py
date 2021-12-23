@@ -23,7 +23,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.action == 'crawl':
+    if args.action == 'webcrawl':
         from WikiCrawler.wikiCrawler import Crawler
         Crawler(args.db).start(args.link)
+    elif args.action == 'apicrawl':
+        from WikiCrawler.apiCrawler import ApiCrawler
+        ApiCrawler(args.db).start()
     
