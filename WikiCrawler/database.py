@@ -13,6 +13,35 @@ class Neo4jDatabase:
             self.driver = GraphDatabase.driver(uri)
         logging.info("Connected to Neo4j database")
 
+    def reload_connection(self, uri = None):
+        self.driver.close()
+        if hasattr(self, "user") and hasattr(self, "password"):
+            self.driver = GraphDatabase.driver(uri, auth=(self.user, self.password))
+            return True
+        else:
+            logging.info("Reloading connection to Neo4j database")
+            if uri:
+                self.driver = GraphDatabase.driver(uri)
+                return True
+            else:
+                self.driver = GraphDatabase.driver(self.uri)
+                logging.info("Connection to Neo4j database reloaded")
+                return True
+        return False
+                
+    @staticmethod
+    def clean_string(string):
+        """Clean a string to be used in Cypher query
+
+        Args:
+            string (str): string to clean
+
+        Returns:
+            [str]: cleaned string
+        """
+        return string.replace("\\", "\\\\").replace('"', '\\"').replace("'", "\\'")
+
+
     def __del__(self):
         self.driver.close()
 
