@@ -26,6 +26,10 @@ class Neo4jDatabase:
         return [record for record in tx.run("MATCH (:WikiPage {" + f"link: \"{str(link)}\"" + "}" + f")-[relation]-(leaf) RETURN leaf LIMIT {limit}")]
    
     @unit_of_work(timeout=5)
+    def _update_node_not_found(self, tx, title):
+        tx.run("MATCH (n:WikiPage {Title: \"%s\"}) SET n.NotFound = true" % title)
+
+    @unit_of_work(timeout=5)
     def _get_lonely_nodes(self, tx):
         return [record for record in tx.run("MATCH (a:WikiPage) WHERE not ((a)-[:IsIn]->(:WikiPage)) RETURN a LIMIT 50;")]
 
@@ -42,6 +46,13 @@ class Neo4jDatabase:
         # Return all nodes in limit
         with self.driver.session() as session:
             return session.read_transaction(self._get_relations, limit)
+
+
+    def update_node_not_found(self, title):
+        logging.info("Page not found : %s notified to db" % title)
+        with self.driver.session() as session:
+            session.write_transaction(self._update_node_not_found, title)
+        return "Ok"
 
     def add_new_page(self, content, leaves):
         # Add a new root node and create a relationship with all the leaves
