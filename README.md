@@ -1,5 +1,5 @@
 # WikiMap
-Let's map wikipedia
+A simple crawler of Wikipedia to create a graph database with links on Wikipedia pages
 
 ## WikiCrawler
 Give all the article links in a given wikipedia article using BeautifulSoup in python.
